@@ -24,21 +24,21 @@ function ExpenseDetail() {
   const loadData = async () => {
     try {
       const result = await api.get(`/expense/${id}/detail`)
-      setExpense(result.data || result)
+      setExpense(result)
       // 如果有发票校验结果，也加载
-      if (result.data?.invoices?.some(i => i.validation_result)) {
+      if (result?.invoices?.some(i => i.validation_result)) {
         // 汇总显示
-        const hasError = result.data.invoices.some(i => i.validation_result === 'invalid')
-        const hasWarning = result.data.invoices.some(i => i.validation_result === 'warning')
+        const hasError = result.invoices.some(i => i.validation_result === 'invalid')
+        const hasWarning = result.invoices.some(i => i.validation_result === 'warning')
         setValidationResult({
           overall: hasError ? 'invalid' : hasWarning ? 'warning' : 'valid',
-          summary: result.data.invoices[0]?.validation_message || ''
+          summary: result.invoices[0]?.validation_message || ''
         })
       }
     } catch (e) {
       try {
         const result = await api.get(`/expense/${id}`)
-        setExpense({ ...result.data || result, invoices: [] })
+        setExpense({ ...result, invoices: [] })
       } catch (e2) {
         message.error('加载失败')
       }

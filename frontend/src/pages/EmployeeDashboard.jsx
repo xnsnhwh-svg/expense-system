@@ -25,7 +25,7 @@ function EmployeeDashboard() {
   const loadData = async () => {
     try {
       const result = await api.get('/expense/list')
-      setExpenses(result.data || [])
+      setExpenses(result || [])
     } catch (e) {
       console.error(e)
     }

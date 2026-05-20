@@ -18,7 +18,7 @@ function ManagerDashboard() {
     try {
       const result = await api.get('/expense/list')
       // 主管看所有状态
-      setExpenses(result.data || [])
+      setExpenses(result || [])
     } catch (e) {
       console.error(e)
     }

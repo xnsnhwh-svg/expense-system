@@ -18,7 +18,7 @@ function FinanceDashboard() {
     try {
       const result = await api.get('/expense/list')
       // 只显示待财务审核的
-      const pending = (result.data || []).filter(e =>
+      const pending = (result || []).filter(e =>
         e.status === 'pending_finance' || e.status === 'pending_manager'
       )
       setExpenses(pending)
