@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.env
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads
+uploads/
+
+# Mac
+.DS_Store
+
+# PostgreSQL data
+*.pgdata
