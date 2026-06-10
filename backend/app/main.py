@@ -1,9 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.routers import auth, expense, approval
 from app.routers.invoice import router as invoice_router
+from app.routers.admin import router as admin_router
+from app.routers.notification import router as notification_router
+from app.routers.budget import router as budget_router
+from app.routers.standard import router as standard_router
+import os
 
-app = FastAPI(title="企业财务智能报销系统", version="1.0.0")
+app = FastAPI(title="企业财务智能报销系统", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,14 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+if os.path.exists(uploads_dir):
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 app.include_router(auth.router)
 app.include_router(expense.router)
 app.include_router(approval.router)
 app.include_router(invoice_router)
+app.include_router(admin_router)
+app.include_router(notification_router)
+app.include_router(budget_router)
+app.include_router(standard_router)
+
 
 @app.get("/")
 def root():
     return {"message": "企业财务智能报销系统 API"}
+
 
 @app.get("/health")
 def health():

@@ -51,7 +51,7 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-open http://localhost:3000
+open http://localhost:3001
 npm run dev &
 FRONTEND_PID=$!
 
@@ -60,7 +60,7 @@ echo "========================================"
 echo "  系统已启动！"
 echo "========================================"
 echo ""
-echo "  前端: http://localhost:3000"
+echo "  前端: http://localhost:3001"
 echo "  后端: http://localhost:8000"
 echo "  API文档: http://localhost:8000/docs"
 echo ""

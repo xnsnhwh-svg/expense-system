@@ -15,6 +15,7 @@ class Invoice(Base):
     image_url = Column(String(500))
     ocr_raw_text = Column(Text)
     ocr_confidence = Column(Numeric(5, 4))
-    validation_result = Column(String(50))  # valid/invalid/warning
+    validation_result = Column(String(50))
     validation_message = Column(Text)
+    validation_details = Column(Text)
     created_at = Column(Integer)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Invoice, Expense
+from app.models import Invoice, Expense, ExpenseStatus
 from app.services.file_service import file_service
 from app.services.validation_service import validation_service
 import aiohttp
@@ -9,6 +9,10 @@ import base64
 import json
 from app.config import settings
 from datetime import datetime
+try:
+    import fitz
+except ImportError:
+    fitz = None
 
 router = APIRouter(prefix="/invoice", tags=["发票"])
 
@@ -48,10 +52,23 @@ async def recognize_invoice(image_path: str) -> dict:
     try:
         access_token = await get_baidu_access_token()
 
-        with open(image_path, "rb") as f:
-            image_base64 = base64.b64encode(f.read()).decode()
+        # 根据文件类型处理
+        ext = image_path.lower().split('.')[-1]
+        if ext == 'pdf':
+            if fitz is None:
+                return {"success": False, "error": "PyMuPDF未安装，暂不支持PDF发票识别。请安装: pip install PyMuPDF"}
+            doc = fitz.open(image_path)
+            page = doc[0]
+            pix = page.get_pixmap(dpi=200)
+            img_bytes = pix.tobytes("png")
+            doc.close()
+            image_base64 = base64.b64encode(img_bytes).decode()
+            url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice"
+        else:
+            with open(image_path, "rb") as f:
+                image_base64 = base64.b64encode(f.read()).decode()
+            url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice"
 
-        url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice"
         params = {"access_token": access_token}
         data = {"image": image_base64}
 
@@ -61,17 +78,52 @@ async def recognize_invoice(image_path: str) -> dict:
 
         if "words_result" in result:
             words = result["words_result"]
+            total_amount = float(words.get("TotalAmount", "0") or 0)
+            tax_amount = float(words.get("TaxAmount", "0") or 0)
             return {
                 "success": True,
                 "data": {
                     "invoice_code": words.get("InvoiceCode", ""),
-                    "invoice_no": words.get("InvoiceNo", ""),
+                    "invoice_no": words.get("InvoiceNum", ""),
                     "invoice_date": words.get("InvoiceDate", ""),
                     "seller_name": words.get("SellerName", ""),
-                    "buyer_name": words.get("BuyerName", ""),
-                    "amount": words.get("TotalAmount", "0"),
-                    "tax_amount": words.get("TaxAmount", "0"),
+                    "buyer_name": words.get("PurchaserName", ""),
+                    "amount": str(total_amount + tax_amount),
+                    "tax_amount": str(tax_amount),
                     "ocr_confidence": 0.9
+                }
+            }
+
+        # VAT模板匹配失败，回退到通用OCR
+        url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
+        params = {"access_token": access_token}
+        data = {"image": image_base64}
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, params=params, data=data) as resp:
+                result = await resp.json()
+
+        if "words_result_num" in result:
+            words_list = result.get("words_result", [])
+            raw_text = " ".join([w.get("words", "") for w in words_list])
+
+            from app.agents.tools import InvoiceParser
+            amount = InvoiceParser.extract_amount(raw_text)
+            invoice_no = InvoiceParser.extract_invoice_no(raw_text)
+            invoice_date = InvoiceParser.extract_date(raw_text)
+
+            return {
+                "success": True,
+                "data": {
+                    "invoice_code": "",
+                    "invoice_no": invoice_no or f"AUTO-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                    "invoice_date": invoice_date,
+                    "seller_name": "通用识别",
+                    "buyer_name": "",
+                    "amount": str(amount) if amount > 0 else "0",
+                    "tax_amount": "0",
+                    "ocr_confidence": 0.7,
+                    "raw_text": raw_text
                 }
             }
         else:
@@ -114,7 +166,16 @@ async def upload_invoice(
     if ocr_result["success"]:
         invoice.invoice_code = ocr_result["data"].get("invoice_code")
         invoice.invoice_no = ocr_result["data"].get("invoice_no")
-        invoice.invoice_date = datetime.strptime(ocr_result["data"].get("invoice_date", "2024-01-01"), "%Y-%m-%d").date() if ocr_result["data"].get("invoice_date") else None
+
+        raw_date = ocr_result["data"].get("invoice_date")
+        if raw_date:
+            for fmt in ["%Y-%m-%d", "%Y年%m月%d日", "%Y/%m/%d", "%Y.%m.%d"]:
+                try:
+                    invoice.invoice_date = datetime.strptime(raw_date, fmt).date()
+                    break
+                except ValueError:
+                    continue
+
         invoice.seller_name = ocr_result["data"].get("seller_name")
         invoice.buyer_name = ocr_result["data"].get("buyer_name")
         invoice.invoice_amount = float(ocr_result["data"].get("amount", 0))
@@ -148,7 +209,9 @@ def list_invoices(expense_id: int, db: Session = Depends(get_db)):
         "seller_name": inv.seller_name,
         "image_url": inv.image_url,
         "ocr_confidence": float(inv.ocr_confidence) if inv.ocr_confidence else None,
-        "validation_result": inv.validation_result
+        "validation_result": inv.validation_result,
+        "validation_message": inv.validation_message,
+        "validation_details": json.loads(inv.validation_details) if inv.validation_details else None
     } for inv in invoices]
 
 @router.post("/validate/{invoice_id}")
@@ -163,12 +226,13 @@ async def validate_invoice(
 
     result = validation_service.validate_invoice(invoice, db)
 
-    # 更新发票校验结果
     invoice.validation_result = result["overall"]
     invoice.validation_message = result["summary"]
+    invoice.validation_details = json.dumps(result["details"], ensure_ascii=False)
     db.commit()
 
     return result
+
 
 @router.post("/validate-expense/{expense_id}")
 async def validate_expense_invoices(
@@ -193,9 +257,9 @@ async def validate_expense_invoices(
     results = []
     for invoice in invoices:
         result = validation_service.validate_invoice(invoice, db)
-        # 更新每张发票的校验结果
         invoice.validation_result = result["overall"]
         invoice.validation_message = result["summary"]
+        invoice.validation_details = json.dumps(result["details"], ensure_ascii=False)
         results.append({
             "invoice_id": invoice.id,
             "invoice_no": invoice.invoice_no,
@@ -221,3 +285,29 @@ async def validate_expense_invoices(
         "invoices": results,
         "can_submit": overall != "invalid"
     }
+
+
+@router.delete("/delete/{invoice_id}")
+def delete_invoice(
+    invoice_id: int,
+    db: Session = Depends(get_db)
+):
+    """删除发票（从数据库中彻底删除）"""
+    import os
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="发票不存在")
+
+    expense = db.query(Expense).filter(Expense.id == invoice.expense_id).first()
+    if expense and expense.status not in [ExpenseStatus.DRAFT, ExpenseStatus.RETURNED]:
+        raise HTTPException(status_code=400, detail="只有草稿或退回状态的报销单可以删除发票")
+
+    file_path = invoice.image_url
+    if file_path:
+        full_path = os.path.join("uploads", "invoices", os.path.basename(file_path))
+        if os.path.exists(full_path):
+            os.remove(full_path)
+
+    db.delete(invoice)
+    db.commit()
+    return {"success": True}

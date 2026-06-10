@@ -18,10 +18,10 @@ fi
 
 echo "[2/2] 启动服务..."
 echo ""
-echo "  访问地址: http://localhost:3000"
+echo "  访问地址: http://localhost:3001"
 echo ""
 echo "  按 Ctrl+C 停止服务"
 echo ""
 
-open http://localhost:3000
+open http://localhost:3001
 npm run dev

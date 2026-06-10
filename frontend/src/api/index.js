@@ -16,7 +16,10 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   response => response.data,
   error => {
-    console.error('API Error:', error)
+    if (error.response?.status === 401) {
+      localStorage.clear()
+      window.location.href = '/login'
+    }
     return Promise.reject(error)
   }
 )
@@ -26,6 +29,9 @@ export const login = (username, password) =>
 
 export const createExpense = (data) =>
   api.post('/expense/create', data)
+
+export const updateExpense = (id, data) =>
+  api.put(`/expense/update/${id}`, data)
 
 export const listExpenses = () =>
   api.get('/expense/list')
@@ -41,6 +47,15 @@ export const approveExpense = (id, comment) =>
 
 export const rejectExpense = (id, comment) =>
   api.post(`/approval/reject/${id}`, { comment })
+
+export const batchApprove = (expense_ids, comment) =>
+  api.post('/approval/batch-approve', { expense_ids, comment })
+
+export const batchReject = (expense_ids, comment) =>
+  api.post('/approval/batch-reject', { expense_ids, comment })
+
+export const payExpense = (id, comment) =>
+  api.post(`/approval/pay/${id}`, { comment })
 
 export const getExpenseDetail = (id) =>
   api.get(`/expense/${id}/detail`)
@@ -58,5 +73,32 @@ export const validateInvoice = (invoiceId) =>
 
 export const validateExpenseInvoices = (expenseId) =>
   api.post(`/invoice/validate-expense/${expenseId}`)
+
+export const listNotifications = () =>
+  api.get('/notification/list')
+
+export const markNotificationRead = (id) =>
+  api.post(`/notification/read/${id}`)
+
+export const markAllNotificationsRead = () =>
+  api.post('/notification/read-all')
+
+export const deleteExpense = (id) =>
+  api.delete('/expense/delete/' + id)
+
+export const listTrash = () =>
+  api.get('/expense/trash/list')
+
+export const restoreExpense = (id) =>
+  api.post('/expense/trash/restore/' + id)
+
+export const permanentDeleteExpense = (id) =>
+  api.delete('/expense/trash/permanent/' + id)
+
+export const permanentDeleteAllTrash = () =>
+  api.delete('/expense/trash/permanent-all')
+
+export const deleteInvoice = (invoiceId) =>
+  api.delete(`/invoice/delete/${invoiceId}`)
 
 export default api

@@ -8,14 +8,18 @@ class InvoiceParser:
     def extract_amount(text: str) -> float:
         """从文本中提取金额"""
         patterns = [
-            r'[¥￥]?\s*(\d+\.?\d*)',
-            r'金额[：:]\s*(\d+\.?\d*)',
-            r'小写[：:]\s*(\d+\.?\d*)',
+            r'票价\s*[：:￥¥]\s*(\d+\.?\d*)',
+            r'金额\s*[：:￥¥]\s*(\d+\.?\d*)',
+            r'合计\s*[：:￥¥]\s*(\d+\.?\d*)',
+            r'小写\s*[：:￥¥]\s*(\d+\.?\d*)',
+            r'[¥￥]\s*(\d{1,8}\.?\d{0,2})\b',
         ]
         for pattern in patterns:
             match = re.search(pattern, text)
             if match:
-                return float(match.group(1))
+                val = float(match.group(1))
+                if 0.01 <= val <= 99999999:
+                    return val
         return 0.0
 
     @staticmethod

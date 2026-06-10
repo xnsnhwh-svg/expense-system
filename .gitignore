@@ -17,8 +17,15 @@ node_modules/
 # Uploads
 uploads/
 
+# Database
+*.db
+
 # Mac
 .DS_Store
 
 # PostgreSQL data
 *.pgdata
+
+# Tools
+.codegraph/
+.playwright-mcp/

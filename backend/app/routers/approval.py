@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Expense, ExpenseStatus, ApprovalLog, User, UserRole
-from app.schemas import ApprovalRequest
+from app.models import Expense, ExpenseStatus, ApprovalLog, User, UserRole, Notification, ApprovalChain
+from app.schemas import ApprovalRequest, BatchApprovalRequest, BatchRejectRequest
 from app.utils.security import get_current_user
+from datetime import datetime
 
 router = APIRouter(prefix="/approval", tags=["审批"])
+
+
+def _notify(db: Session, user_id: int, title: str, content: str, expense_id: int = None):
+    db.add(Notification(user_id=user_id, title=title, content=content, expense_id=expense_id))
+
 
 def can_approve(expense: Expense, user: User) -> bool:
     if expense.status == ExpenseStatus.PENDING_FINANCE:
@@ -13,6 +19,23 @@ def can_approve(expense: Expense, user: User) -> bool:
     if expense.status == ExpenseStatus.PENDING_MANAGER:
         return user.role in [UserRole.MANAGER, UserRole.ADMIN]
     return False
+
+
+def _get_next_status(expense: Expense, db: Session) -> ExpenseStatus:
+    if expense.status == ExpenseStatus.PENDING_FINANCE:
+        chain = db.query(ApprovalChain).filter(
+            ApprovalChain.department == expense.employee.department if expense.employee else "",
+            ApprovalChain.category == expense.category,
+            ApprovalChain.is_active == 1,
+            ApprovalChain.min_amount <= expense.amount,
+            ApprovalChain.max_amount >= expense.amount
+        ).first()
+
+        if chain and not chain.manager_required:
+            return ExpenseStatus.APPROVED
+        return ExpenseStatus.PENDING_MANAGER
+    return ExpenseStatus.APPROVED
+
 
 @router.post("/approve/{expense_id}")
 def approve_expense(
@@ -22,26 +45,29 @@ def approve_expense(
     current_user: User = Depends(get_current_user)
 ):
     expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="报销单不存在")
     if not can_approve(expense, current_user):
         raise HTTPException(status_code=403, detail="无权审批")
 
     old_status = expense.status.value
-    if expense.status == ExpenseStatus.PENDING_FINANCE:
-        expense.status = ExpenseStatus.PENDING_MANAGER
-    elif expense.status == ExpenseStatus.PENDING_MANAGER:
-        expense.status = ExpenseStatus.APPROVED
+    expense.status = _get_next_status(expense, db)
 
     log = ApprovalLog(
-        expense_id=expense.id,
-        approver_id=current_user.id,
-        action="approve",
-        comment=req.comment,
-        from_status=old_status,
-        to_status=expense.status.value
+        expense_id=expense.id, approver_id=current_user.id,
+        action="approve", comment=req.comment,
+        from_status=old_status, to_status=expense.status.value
     )
     db.add(log)
+
+    _notify(db, expense.employee_id,
+        f"报销单{expense.expense_no}审核通过",
+        f"财务已审核通过你的报销单，金额¥{float(expense.amount):.2f}",
+        expense.id)
+
     db.commit()
     return {"success": True, "status": expense.status.value}
+
 
 @router.post("/reject/{expense_id}")
 def reject_expense(
@@ -51,20 +77,110 @@ def reject_expense(
     current_user: User = Depends(get_current_user)
 ):
     expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="报销单不存在")
     if not can_approve(expense, current_user):
         raise HTTPException(status_code=403, detail="无权审批")
 
     old_status = expense.status.value
-    expense.status = ExpenseStatus.REJECTED
+    expense.status = ExpenseStatus.RETURNED
 
     log = ApprovalLog(
-        expense_id=expense.id,
-        approver_id=current_user.id,
-        action="reject",
-        comment=req.comment,
-        from_status=old_status,
-        to_status=expense.status.value
+        expense_id=expense.id, approver_id=current_user.id,
+        action="return", comment=req.comment,
+        from_status=old_status, to_status=expense.status.value
     )
     db.add(log)
+
+    _notify(db, expense.employee_id,
+        f"报销单{expense.expense_no}被退回",
+        f"原因：{req.comment or '无'}，请修改后重新提交",
+        expense.id)
+
     db.commit()
     return {"success": True, "status": expense.status.value}
+
+
+@router.post("/batch-approve")
+def batch_approve(
+    req: BatchApprovalRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    results = []
+    for eid in req.expense_ids:
+        expense = db.query(Expense).filter(Expense.id == eid).first()
+        if expense and can_approve(expense, current_user):
+            old_status = expense.status.value
+            expense.status = _get_next_status(expense, db)
+            log = ApprovalLog(
+                expense_id=expense.id, approver_id=current_user.id,
+                action="approve", comment=req.comment,
+                from_status=old_status, to_status=expense.status.value
+            )
+            db.add(log)
+            results.append({"id": eid, "success": True})
+        else:
+            results.append({"id": eid, "success": False, "error": "无权操作"})
+    db.commit()
+    return {"results": results}
+
+
+@router.post("/batch-reject")
+def batch_reject(
+    req: BatchRejectRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    results = []
+    for eid in req.expense_ids:
+        expense = db.query(Expense).filter(Expense.id == eid).first()
+        if expense and can_approve(expense, current_user):
+            old_status = expense.status.value
+            expense.status = ExpenseStatus.RETURNED
+            log = ApprovalLog(
+                expense_id=expense.id, approver_id=current_user.id,
+                action="return", comment=req.comment,
+                from_status=old_status, to_status=expense.status.value
+            )
+            db.add(log)
+            results.append({"id": eid, "success": True})
+        else:
+            results.append({"id": eid, "success": False, "error": "无权操作"})
+    db.commit()
+    return {"results": results}
+
+
+@router.post("/pay/{expense_id}")
+def mark_as_paid(
+    expense_id: int,
+    req: ApprovalRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="报销单不存在")
+    if current_user.role not in [UserRole.FINANCE, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="只有财务或管理员可以打款")
+    if expense.status != ExpenseStatus.APPROVED:
+        raise HTTPException(status_code=400, detail="只有已审批通过的报销单可以打款")
+
+    expense.status = ExpenseStatus.PAID
+    expense.paid_at = datetime.utcnow()
+
+    log = ApprovalLog(
+        expense_id=expense.id, approver_id=current_user.id,
+        action="paid", comment=req.comment or "已打款",
+        from_status=ExpenseStatus.APPROVED.value,
+        to_status=ExpenseStatus.PAID.value
+    )
+    db.add(log)
+
+    _notify(db, expense.employee_id,
+        f"报销单{expense.expense_no}已打款",
+        f"你的报销已打款完成，金额¥{float(expense.amount):.2f}",
+        expense.id)
+
+    db.commit()
+    return {"success": True, "status": expense.status.value, "paid_at": expense.paid_at.isoformat()}
