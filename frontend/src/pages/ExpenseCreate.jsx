@@ -45,44 +45,45 @@ export default function ExpenseCreate() {
       <div className="max-w-2xl mx-auto">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
+          className="flex items-center gap-1.5 text-[13px] text-warm-400 hover:text-warm-600 mb-5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           返回
         </button>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl border border-slate-200 p-6 lg:p-8"
+          transition={{ ease: [0.16, 1, 0.3, 1] }}
+          className="glass rounded-2xl shadow-glass p-6 lg:p-8"
         >
-          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-            <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
-              <User className="w-5 h-5 text-brand-600" />
+          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-warm-200/50">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-sm">
+              <User className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-800">{user.full_name || user.username}</p>
-              <p className="text-xs text-slate-500">{user.department || '未分配部门'} · {user.role === 'employee' ? '员工' : user.role === 'manager' ? '主管' : user.role}</p>
+              <p className="text-[14px] font-medium text-warm-800 tracking-tight">{user.full_name || user.username}</p>
+              <p className="text-[12px] text-warm-400">{user.department || '未分配部门'}</p>
             </div>
           </div>
 
-          <h2 className="text-lg font-semibold text-slate-800 mb-6">填写报销信息</h2>
+          <h2 className="text-[16px] font-semibold text-warm-800 mb-5 tracking-tight">填写报销信息</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-lg">
+              <div className="text-[13px] text-red-600 bg-red-50/80 rounded-xl px-4 py-3">
                 {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                  <DollarSign className="w-4 h-4 text-slate-400" />
+                <label className="flex items-center gap-1.5 text-[12px] font-medium text-warm-500 mb-1.5 tracking-tight">
+                  <DollarSign className="w-3.5 h-3.5 text-warm-300" />
                   报销金额
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">¥</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-400 font-medium text-[14px]">¥</span>
                   <input
                     type="number"
                     min="0.01"
@@ -90,28 +91,28 @@ export default function ExpenseCreate() {
                     value={amount}
                     onChange={e => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
+                    className="w-full pl-9 pr-4 py-2.5 bg-warm-100/60 border-0 rounded-xl text-[14px] text-warm-800 placeholder:text-warm-300 focus:ring-2 focus:ring-brand-400/30 focus:bg-white outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                  <Calendar className="w-4 h-4 text-slate-400" />
+                <label className="flex items-center gap-1.5 text-[12px] font-medium text-warm-500 mb-1.5 tracking-tight">
+                  <Calendar className="w-3.5 h-3.5 text-warm-300" />
                   费用日期
                 </label>
                 <input
                   type="date"
                   value={expenseDate}
                   onChange={e => setExpenseDate(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
+                  className="w-full px-4 py-2.5 bg-warm-100/60 border-0 rounded-xl text-[14px] text-warm-800 focus:ring-2 focus:ring-brand-400/30 focus:bg-white outline-none transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                <Tag className="w-4 h-4 text-slate-400" />
+              <label className="flex items-center gap-1.5 text-[12px] font-medium text-warm-500 mb-1.5 tracking-tight">
+                <Tag className="w-3.5 h-3.5 text-warm-300" />
                 报销类别
               </label>
               <div className="grid grid-cols-3 lg:grid-cols-5 gap-2">
@@ -120,10 +121,10 @@ export default function ExpenseCreate() {
                     key={cat}
                     type="button"
                     onClick={() => setCategory(cat)}
-                    className={'py-2.5 px-3 rounded-lg text-sm font-medium border transition-all ' +
+                    className={'py-2.5 px-3 rounded-xl text-[13px] font-medium transition-all ' +
                       (category === cat
-                        ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50')}
+                        ? 'bg-warm-800 text-white shadow-sm'
+                        : 'bg-warm-100/60 text-warm-500 hover:bg-warm-200/60 hover:text-warm-700')}
                   >
                     {cat}
                   </button>
@@ -132,8 +133,8 @@ export default function ExpenseCreate() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                <CreditCard className="w-4 h-4 text-slate-400" />
+              <label className="flex items-center gap-1.5 text-[12px] font-medium text-warm-500 mb-1.5 tracking-tight">
+                <CreditCard className="w-3.5 h-3.5 text-warm-300" />
                 收款方式
               </label>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -142,10 +143,10 @@ export default function ExpenseCreate() {
                     key={method}
                     type="button"
                     onClick={() => setPaymentMethod(method === paymentMethod ? '' : method)}
-                    className={'py-2.5 px-3 rounded-lg text-sm font-medium border transition-all ' +
+                    className={'py-2.5 px-3 rounded-xl text-[13px] font-medium transition-all ' +
                       (paymentMethod === method
-                        ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50')}
+                        ? 'bg-warm-800 text-white shadow-sm'
+                        : 'bg-warm-100/60 text-warm-500 hover:bg-warm-200/60 hover:text-warm-700')}
                   >
                     {method}
                   </button>
@@ -154,8 +155,8 @@ export default function ExpenseCreate() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                <FileText className="w-4 h-4 text-slate-400" />
+              <label className="flex items-center gap-1.5 text-[12px] font-medium text-warm-500 mb-1.5 tracking-tight">
+                <FileText className="w-3.5 h-3.5 text-warm-300" />
                 报销事由
               </label>
               <textarea
@@ -163,22 +164,22 @@ export default function ExpenseCreate() {
                 onChange={e => setDescription(e.target.value)}
                 rows={4}
                 placeholder="请详细描述报销原因..."
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all resize-none"
+                className="w-full px-4 py-2.5 bg-warm-100/60 border-0 rounded-xl text-[14px] text-warm-800 placeholder:text-warm-300 focus:ring-2 focus:ring-brand-400/30 focus:bg-white outline-none transition-all resize-none"
               />
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-1">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:bg-brand-300 text-white rounded-lg font-medium text-sm transition-all hover:shadow-lg hover:shadow-brand-500/20 active:scale-[0.98]"
+                className="flex-1 py-2.5 bg-warm-800 hover:bg-warm-900 disabled:bg-warm-300 text-white rounded-xl font-medium text-[14px] tracking-tight transition-all active:scale-[0.98]"
               >
                 {loading ? '创建中...' : '创建报销单'}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/employee')}
-                className="px-6 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg font-medium text-sm transition-colors"
+                className="px-6 py-2.5 bg-warm-100/60 text-warm-500 hover:bg-warm-200/60 hover:text-warm-700 rounded-xl font-medium text-[14px] transition-colors"
               >
                 取消
               </button>

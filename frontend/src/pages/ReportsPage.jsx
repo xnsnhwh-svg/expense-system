@@ -36,27 +36,27 @@ export default function ReportsPage() {
   return (
     <AppLayout title="数据分析">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-slate-800">数据概览</h2>
+        <h2 className="text-lg font-semibold text-warm-800">数据概览</h2>
         <a href="/api/admin/reports/export" target="_blank"
-          className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+          className="flex items-center gap-1.5 px-3 py-2 text-sm text-warm-600 hover:bg-warm-200/60 rounded-xl transition-colors">
           <Download className="w-4 h-4" /> 导出 CSV
         </a>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {statCards.map((card, i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 p-4">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{card.label}</span>
-            <p className="text-2xl font-bold text-slate-800 mt-1">{card.value}</p>
+          <div key={i} className="glass rounded-2xl shadow-glass p-4">
+            <span className="text-xs font-medium text-warm-500 uppercase tracking-wide">{card.label}</span>
+            <p className="text-2xl font-bold text-warm-800 mt-1">{card.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h3 className="text-sm font-semibold text-slate-800 mb-4">按类别统计</h3>
+      <div className="glass rounded-2xl shadow-glass p-6 mb-6">
+        <h3 className="text-sm font-semibold text-warm-800 mb-4">按类别统计</h3>
         <table className="w-full">
           <thead>
-            <tr className="text-xs text-slate-500 border-b border-slate-100">
+            <tr className="text-xs text-warm-500 border-b border-warm-200/50">
               <th className="text-left px-4 py-2 font-medium">类别</th>
               <th className="text-left px-4 py-2 font-medium">数量</th>
               <th className="text-right px-4 py-2 font-medium">金额</th>
@@ -64,21 +64,21 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {byCategory.map(row => (
-              <tr key={row.category} className="border-b border-slate-50">
-                <td className="px-4 py-2.5 text-sm text-slate-700">{row.category}</td>
-                <td className="px-4 py-2.5 text-sm text-slate-600">{row.count}</td>
-                <td className="px-4 py-2.5 text-right text-sm font-semibold text-slate-800">¥{row.amount?.toFixed(2)}</td>
+              <tr key={row.category} className="border-b border-warm-200/30">
+                <td className="px-4 py-2.5 text-sm text-warm-700">{row.category}</td>
+                <td className="px-4 py-2.5 text-sm text-warm-600">{row.count}</td>
+                <td className="px-4 py-2.5 text-right text-sm font-semibold text-warm-800">¥{row.amount?.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h3 className="text-sm font-semibold text-slate-800 mb-4">按部门统计</h3>
+      <div className="glass rounded-2xl shadow-glass p-6 mb-6">
+        <h3 className="text-sm font-semibold text-warm-800 mb-4">按部门统计</h3>
         <table className="w-full">
           <thead>
-            <tr className="text-xs text-slate-500 border-b border-slate-100">
+            <tr className="text-xs text-warm-500 border-b border-warm-200/50">
               <th className="text-left px-4 py-2 font-medium">部门</th>
               <th className="text-left px-4 py-2 font-medium">数量</th>
               <th className="text-right px-4 py-2 font-medium">金额</th>
@@ -86,21 +86,21 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {byDept.map(row => (
-              <tr key={row.department} className="border-b border-slate-50">
-                <td className="px-4 py-2.5 text-sm text-slate-700">{row.department}</td>
-                <td className="px-4 py-2.5 text-sm text-slate-600">{row.count}</td>
-                <td className="px-4 py-2.5 text-right text-sm font-semibold text-slate-800">¥{row.amount?.toFixed(2)}</td>
+              <tr key={row.department} className="border-b border-warm-200/30">
+                <td className="px-4 py-2.5 text-sm text-warm-700">{row.department}</td>
+                <td className="px-4 py-2.5 text-sm text-warm-600">{row.count}</td>
+                <td className="px-4 py-2.5 text-right text-sm font-semibold text-warm-800">¥{row.amount?.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <h3 className="text-sm font-semibold text-slate-800 mb-4">月度趋势</h3>
+      <div className="glass rounded-2xl shadow-glass p-6">
+        <h3 className="text-sm font-semibold text-warm-800 mb-4">月度趋势</h3>
         <table className="w-full">
           <thead>
-            <tr className="text-xs text-slate-500 border-b border-slate-100">
+            <tr className="text-xs text-warm-500 border-b border-warm-200/50">
               <th className="text-left px-4 py-2 font-medium">月份</th>
               <th className="text-left px-4 py-2 font-medium">数量</th>
               <th className="text-right px-4 py-2 font-medium">金额</th>
@@ -108,10 +108,10 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {monthlyData.map(row => (
-              <tr key={row.month} className="border-b border-slate-50">
-                <td className="px-4 py-2.5 text-sm text-slate-700">{row.month}月</td>
-                <td className="px-4 py-2.5 text-sm text-slate-600">{row.count}</td>
-                <td className="px-4 py-2.5 text-right text-sm font-semibold text-slate-800">¥{row.amount?.toFixed(2)}</td>
+              <tr key={row.month} className="border-b border-warm-200/30">
+                <td className="px-4 py-2.5 text-sm text-warm-700">{row.month}月</td>
+                <td className="px-4 py-2.5 text-sm text-warm-600">{row.count}</td>
+                <td className="px-4 py-2.5 text-right text-sm font-semibold text-warm-800">¥{row.amount?.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>

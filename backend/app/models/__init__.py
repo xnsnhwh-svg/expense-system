@@ -8,10 +8,14 @@ from app.models.budget import Budget
 from app.models.expense_standard import ExpenseStandard
 from app.models.approval_chain import ApprovalChain
 from app.models.expense_split import ExpenseSplit
+from app.models.payment import Payment, PaymentStatus
+from app.models.message import Message
+from app.models.chat_read_status import ChatReadStatus
 from app.database import Base
 
 __all__ = [
     "User", "UserRole", "Expense", "ExpenseStatus", "Invoice", "ApprovalLog",
     "Notification", "SystemConfig", "ExpenseCategory", "Budget",
-    "ExpenseStandard", "ApprovalChain", "ExpenseSplit", "Base"
+    "ExpenseStandard", "ApprovalChain", "ExpenseSplit", "Payment", "PaymentStatus",
+    "Message", "ChatReadStatus", "Base"
 ]

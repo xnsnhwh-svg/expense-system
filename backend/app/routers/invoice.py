@@ -29,11 +29,24 @@ async def get_baidu_access_token():
             result = await resp.json()
             return result.get("access_token")
 
-# OCR识别
+# OCR识别 - 多类型票据支持
+OCR_ENDPOINTS = [
+    ("vat_invoice", "增值税发票", {"InvoiceCode": "invoice_code", "InvoiceNum": "invoice_no", "InvoiceDate": "invoice_date", "SellerName": "seller_name", "PurchaserName": "buyer_name", "TotalAmount": "amount", "TaxAmount": "tax_amount"}),
+    ("train_ticket", "火车票", {"ticket_num": "invoice_no", "date": "invoice_date", "start_station": "seller_name", "ticket_rates": "amount"}),
+    ("taxi_receipt", "出租车票", {"receipt_num": "invoice_no", "date": "invoice_date", "fare": "amount"}),
+    ("quota_invoice", "定额发票", {"invoice_code": "invoice_code", "invoice_num": "invoice_no", "invoice_date": "invoice_date", "amount": "amount"}),
+    ("air_ticket", "飞机票", {"ticket_no": "invoice_no", "date": "invoice_date", "fare": "amount", "total": "amount"}),
+    ("receipt", "通用票据", {"receipt_num": "invoice_no", "date": "invoice_date", "amount": "amount"}),
+    ("business_license", "营业执照", {}),
+    ("bank_receipt", "银行回单", {}),
+    ("idcard", "身份证", {}),
+    ("general_basic", "通用文字", {}),
+]
+
+
 async def recognize_invoice(image_path: str) -> dict:
-    """调用百度OCR识别发票"""
+    """调用百度OCR识别发票，支持10种票据类型"""
     if not settings.BAIDU_OCR_API_KEY:
-        # 没有配置API时，返回模拟数据
         return {
             "success": True,
             "data": {
@@ -44,7 +57,8 @@ async def recognize_invoice(image_path: str) -> dict:
                 "buyer_name": "软通动力",
                 "amount": "1000.00",
                 "tax_amount": "100.00",
-                "ocr_confidence": 0.95
+                "ocr_confidence": 0.95,
+                "invoice_type": "mock"
             },
             "mock": True
         }
@@ -52,82 +66,81 @@ async def recognize_invoice(image_path: str) -> dict:
     try:
         access_token = await get_baidu_access_token()
 
-        # 根据文件类型处理
         ext = image_path.lower().split('.')[-1]
         if ext == 'pdf':
-            if fitz is None:
-                return {"success": False, "error": "PyMuPDF未安装，暂不支持PDF发票识别。请安装: pip install PyMuPDF"}
             doc = fitz.open(image_path)
             page = doc[0]
             pix = page.get_pixmap(dpi=200)
             img_bytes = pix.tobytes("png")
             doc.close()
             image_base64 = base64.b64encode(img_bytes).decode()
-            url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice"
         else:
             with open(image_path, "rb") as f:
                 image_base64 = base64.b64encode(f.read()).decode()
-            url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice"
 
-        params = {"access_token": access_token}
-        data = {"image": image_base64}
+        for endpoint, invoice_type, field_map in OCR_ENDPOINTS:
+            url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/{endpoint}"
+            params = {"access_token": access_token}
+            data = {"image": image_base64}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, params=params, data=data) as resp:
-                result = await resp.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, params=params, data=data) as resp:
+                    result = await resp.json()
 
-        if "words_result" in result:
-            words = result["words_result"]
-            total_amount = float(words.get("TotalAmount", "0") or 0)
-            tax_amount = float(words.get("TaxAmount", "0") or 0)
-            return {
-                "success": True,
-                "data": {
-                    "invoice_code": words.get("InvoiceCode", ""),
-                    "invoice_no": words.get("InvoiceNum", ""),
-                    "invoice_date": words.get("InvoiceDate", ""),
-                    "seller_name": words.get("SellerName", ""),
-                    "buyer_name": words.get("PurchaserName", ""),
-                    "amount": str(total_amount + tax_amount),
-                    "tax_amount": str(tax_amount),
-                    "ocr_confidence": 0.9
+            if "error_code" in result:
+                continue
+
+            words = result.get("words_result", {})
+            if not words:
+                continue
+
+            if invoice_type == "通用文字":
+                words_list = result.get("words_result", [])
+                raw_text = " ".join([w.get("words", "") for w in words_list])
+                from app.agents.tools import InvoiceParser
+                amount = InvoiceParser.extract_amount(raw_text)
+                invoice_no = InvoiceParser.extract_invoice_no(raw_text)
+                invoice_date = InvoiceParser.extract_date(raw_text)
+                return {
+                    "success": True,
+                    "data": {
+                        "invoice_code": "",
+                        "invoice_no": invoice_no or f"AUTO-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                        "invoice_date": invoice_date,
+                        "seller_name": "通用识别",
+                        "buyer_name": "",
+                        "amount": str(amount) if amount > 0 else "0",
+                        "tax_amount": "0",
+                        "ocr_confidence": 0.65,
+                        "invoice_type": invoice_type,
+                        "raw_text": raw_text
+                    }
                 }
-            }
 
-        # VAT模板匹配失败，回退到通用OCR
-        url = f"https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
-        params = {"access_token": access_token}
-        data = {"image": image_base64}
+            result_data = {"invoice_type": invoice_type, "ocr_confidence": 0.9}
+            for api_field, our_field in field_map.items():
+                val = words.get(api_field, "")
+                if isinstance(val, dict):
+                    val = val.get("word", "")
+                result_data[our_field] = val
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, params=params, data=data) as resp:
-                result = await resp.json()
+            if invoice_type == "增值税发票":
+                total = float(result_data.get("amount", "0") or 0)
+                tax = float(result_data.get("tax_amount", "0") or 0)
+                result_data["amount"] = str(total + tax)
 
-        if "words_result_num" in result:
-            words_list = result.get("words_result", [])
-            raw_text = " ".join([w.get("words", "") for w in words_list])
+            result_data.setdefault("invoice_code", "")
+            result_data.setdefault("invoice_no", "")
+            result_data.setdefault("invoice_date", "")
+            result_data.setdefault("seller_name", "")
+            result_data.setdefault("buyer_name", "")
+            result_data.setdefault("amount", "0")
+            result_data.setdefault("tax_amount", "0")
 
-            from app.agents.tools import InvoiceParser
-            amount = InvoiceParser.extract_amount(raw_text)
-            invoice_no = InvoiceParser.extract_invoice_no(raw_text)
-            invoice_date = InvoiceParser.extract_date(raw_text)
+            return {"success": True, "data": result_data}
 
-            return {
-                "success": True,
-                "data": {
-                    "invoice_code": "",
-                    "invoice_no": invoice_no or f"AUTO-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                    "invoice_date": invoice_date,
-                    "seller_name": "通用识别",
-                    "buyer_name": "",
-                    "amount": str(amount) if amount > 0 else "0",
-                    "tax_amount": "0",
-                    "ocr_confidence": 0.7,
-                    "raw_text": raw_text
-                }
-            }
-        else:
-            return {"success": False, "error": result.get("error_msg", "识别失败")}
+        return {"success": False, "error": "无法识别该票据类型，请尝试上传清晰的图片"}
+
     except Exception as e:
         return {"success": False, "error": str(e)}
 
@@ -181,6 +194,7 @@ async def upload_invoice(
         invoice.invoice_amount = float(ocr_result["data"].get("amount", 0))
         invoice.ocr_confidence = ocr_result["data"].get("ocr_confidence")
         invoice.ocr_raw_text = json.dumps(ocr_result["data"], ensure_ascii=False)
+        invoice.invoice_type = ocr_result["data"].get("invoice_type", "")
         db.commit()
 
         return {

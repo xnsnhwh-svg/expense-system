@@ -82,7 +82,7 @@ class ValidationService:
         existing = db.query(Invoice).join(Expense).filter(
             Invoice.invoice_no == invoice.invoice_no,
             Invoice.id != invoice.id,
-            Expense.status.in_(["approved", "paid", "pending_finance", "pending_manager"])
+            Expense.status.in_(["pending_dept", "pending_finance", "pending_manager", "approved", "paid"])
         ).first()
 
         if existing:

@@ -101,4 +101,31 @@ export const permanentDeleteAllTrash = () =>
 export const deleteInvoice = (invoiceId) =>
   api.delete(`/invoice/delete/${invoiceId}`)
 
+export const listPayments = () =>
+  api.get('/payment/list')
+
+export const getPayment = (expenseId) =>
+  api.get(`/payment/${expenseId}`)
+
+export const createPayment = (expenseId, data = {}) =>
+  api.post(`/payment/create/${expenseId}`, data)
+
+export const processPayment = (paymentId) =>
+  api.post(`/payment/process/${paymentId}`)
+
+export const completePayment = (paymentId) =>
+  api.post(`/payment/complete/${paymentId}`)
+
+export const failPayment = (paymentId, reason = '') =>
+  api.post(`/payment/fail/${paymentId}`, { reason })
+
+export const getChatMessages = (expenseId) =>
+  api.get(`/chat/${expenseId}`)
+
+export const sendChatMessage = (expenseId, content) =>
+  api.post(`/chat/${expenseId}`, { content })
+
+export const listMyChats = () =>
+  api.get('/chat/list/my')
+
 export default api

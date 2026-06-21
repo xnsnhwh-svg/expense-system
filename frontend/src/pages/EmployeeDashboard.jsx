@@ -26,73 +26,74 @@ export default function EmployeeDashboard() {
   const stats = {
     total: expenses.length,
     draft: expenses.filter(e => e.status === 'draft' || e.status === 'returned').length,
-    pending: expenses.filter(e => e.status === 'pending_finance' || e.status === 'pending_manager').length,
+    pending: expenses.filter(e => e.status === 'pending_finance' || e.status === 'pending_manager' || e.status === 'pending_dept').length,
     done: expenses.filter(e => e.status === 'approved' || e.status === 'paid').length,
   }
 
   const statCards = [
-    { label: '全部报销', value: stats.total, icon: FileText, color: 'text-slate-600', bg: 'bg-slate-100' },
-    { label: '草稿/退回', value: stats.draft, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-100' },
-    { label: '审批中', value: stats.pending, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: '已完成', value: stats.done, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+    { label: '全部报销', value: stats.total, icon: FileText, color: 'text-warm-600', bg: 'bg-warm-200/60' },
+    { label: '草稿/退回', value: stats.draft, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-100/60' },
+    { label: '审批中', value: stats.pending, icon: Clock, color: 'text-brand-600', bg: 'bg-brand-100/60' },
+    { label: '已完成', value: stats.done, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100/60' },
   ]
 
   return (
     <AppLayout title="我的报销">
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {statCards.map((card, i) => (
           <motion.div
             key={card.label}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow"
+            transition={{ delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+            className="glass rounded-2xl p-4 shadow-glass"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{card.label}</span>
-              <div className={`w-8 h-8 rounded-lg ${card.bg} flex items-center justify-center`}>
-                <card.icon className={`w-4 h-4 ${card.color}`} />
+              <span className="text-[11px] font-medium text-warm-400 uppercase tracking-wider">{card.label}</span>
+              <div className={`w-7 h-7 rounded-[8px] ${card.bg} flex items-center justify-center`}>
+                <card.icon className={`w-3.5 h-3.5 ${card.color}`} />
               </div>
             </div>
-            <span className="text-2xl font-bold text-slate-800">{card.value}</span>
+            <span className="text-[26px] font-semibold text-warm-800 tracking-tight">{card.value}</span>
           </motion.div>
         ))}
       </div>
 
       {/* Expense list */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-800">报销记录</h2>
-          <button
-            onClick={() => navigate('/employee/create')}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-all hover:shadow-lg hover:shadow-brand-500/20 active:scale-[0.98]"
-          >
-            <Plus className="w-4 h-4" />
-            新建报销
-          </button>
-          <button
-            onClick={() => navigate('/employee/trash')}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-            title="回收站"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+      <div className="glass rounded-2xl shadow-glass overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3.5">
+          <h2 className="text-[14px] font-semibold text-warm-700 tracking-tight">报销记录</h2>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => navigate('/employee/trash')}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-warm-400 hover:text-warm-600 hover:bg-warm-200/40 rounded-[10px] transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => navigate('/employee/create')}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-warm-800 hover:bg-warm-900 text-white rounded-[10px] text-[12px] font-medium tracking-tight transition-all active:scale-[0.97]"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              新建报销
+            </button>
+          </div>
         </div>
 
         {loading ? (
-          <div className="p-12 space-y-4">
+          <div className="px-5 pb-5 space-y-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-12 animate-shimmer rounded-lg" />
+              <div key={i} className="h-10 animate-shimmer rounded-xl" />
             ))}
           </div>
         ) : expenses.length === 0 ? (
           <div className="py-16 text-center">
-            <FileText className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-            <p className="text-slate-400 text-sm">暂无报销记录</p>
+            <FileText className="w-10 h-10 text-warm-300 mx-auto mb-3" />
+            <p className="text-[13px] text-warm-400">暂无报销记录</p>
             <button
               onClick={() => navigate('/employee/create')}
-              className="mt-4 text-sm text-brand-500 hover:text-brand-600 font-medium inline-flex items-center gap-1"
+              className="mt-3 text-[13px] text-brand-500 hover:text-brand-600 font-medium inline-flex items-center gap-1"
             >
               创建第一笔报销 <ArrowRight className="w-3 h-3" />
             </button>
@@ -101,12 +102,12 @@ export default function EmployeeDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-xs text-slate-500 border-b border-slate-100">
-                  <th className="text-left px-6 py-3 font-medium">报销单号</th>
-                  <th className="text-left px-6 py-3 font-medium">金额</th>
-                  <th className="text-left px-6 py-3 font-medium">类别</th>
-                  <th className="text-left px-6 py-3 font-medium">状态</th>
-                  <th className="text-right px-6 py-3 font-medium">操作</th>
+                <tr className="text-[11px] text-warm-400 border-b border-warm-200/50">
+                  <th className="text-left px-5 py-2.5 font-medium tracking-wider uppercase">报销单号</th>
+                  <th className="text-left px-5 py-2.5 font-medium tracking-wider uppercase">金额</th>
+                  <th className="text-left px-5 py-2.5 font-medium tracking-wider uppercase">类别</th>
+                  <th className="text-left px-5 py-2.5 font-medium tracking-wider uppercase">状态</th>
+                  <th className="text-right px-5 py-2.5 font-medium tracking-wider uppercase">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -115,33 +116,32 @@ export default function EmployeeDashboard() {
                     key={record.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
+                    transition={{ delay: i * 0.02 }}
+                    className="border-b border-warm-200/30 hover:bg-warm-100/40 transition-colors"
                   >
-                    <td className="px-6 py-3.5 text-sm text-slate-600 font-mono">{record.expense_no}</td>
-                    <td className="px-6 py-3.5 text-sm font-semibold text-slate-800">¥{record.amount?.toFixed(2)}</td>
-                    <td className="px-6 py-3.5 text-sm text-slate-600">{record.category}</td>
-                    <td className="px-6 py-3.5"><StatusBadge status={record.status} /></td>
-                    <td className="px-6 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-5 py-3 text-[13px] text-warm-500 font-mono tracking-tight">{record.expense_no}</td>
+                    <td className="px-5 py-3 text-[13px] font-semibold text-warm-800">¥{record.amount?.toFixed(2)}</td>
+                    <td className="px-5 py-3 text-[13px] text-warm-600">{record.category}</td>
+                    <td className="px-5 py-3"><StatusBadge status={record.status} /></td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => navigate(`/expense/${record.id}`)}
-                          className="text-xs text-slate-500 hover:text-brand-600 font-medium px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                          className="text-[12px] text-warm-400 hover:text-brand-600 font-medium px-2.5 py-1.5 rounded-lg hover:bg-warm-200/40 transition-colors"
                         >
                           查看
                         </button>
                         {(record.status === 'draft' || record.status === 'returned') && (
                           <button
                             onClick={() => navigate(`/expense/${record.id}`)}
-                            className="text-xs bg-amber-500 hover:bg-amber-600 text-white font-medium px-3 py-1.5 rounded-lg transition-colors"
+                            className="text-[12px] bg-amber-500/90 hover:bg-amber-500 text-white font-medium px-3 py-1.5 rounded-lg transition-colors"
                           >
                             去提交
                           </button>
                         )}
                         <button
                           onClick={() => handleDelete(record.id)}
-                          className="text-xs text-slate-400 hover:text-red-500 hover:bg-red-50 font-medium px-2 py-1.5 rounded-lg transition-colors"
-                          title="移到回收站"
+                          className="text-[12px] text-warm-300 hover:text-red-500 hover:bg-red-50 font-medium px-2 py-1.5 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

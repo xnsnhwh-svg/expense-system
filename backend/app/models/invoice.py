@@ -18,4 +18,5 @@ class Invoice(Base):
     validation_result = Column(String(50))
     validation_message = Column(Text)
     validation_details = Column(Text)
+    invoice_type = Column(String(50))
     created_at = Column(Integer)

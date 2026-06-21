@@ -7,6 +7,7 @@ import enum
 class ExpenseStatus(str, enum.Enum):
     DRAFT = "draft"
     RETURNED = "returned"
+    PENDING_DEPT = "pending_dept"
     PENDING_FINANCE = "pending_finance"
     PENDING_MANAGER = "pending_manager"
     APPROVED = "approved"

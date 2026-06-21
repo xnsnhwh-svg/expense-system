@@ -8,6 +8,8 @@ import ExpenseDetail from './pages/ExpenseDetail'
 import AdminDashboard from './pages/AdminDashboard'
 import ReportsPage from './pages/ReportsPage'
 import TrashPage from './pages/TrashPage'
+import PaymentPage from './pages/PaymentPage'
+import ChatPage from './pages/ChatPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -22,6 +24,9 @@ function App() {
       <Route path="/manager" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><ManagerDashboard /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute allowedRoles={['admin', 'finance', 'manager']}><ReportsPage /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/payments" element={<ProtectedRoute allowedRoles={['finance', 'admin']}><PaymentPage /></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute allowedRoles={['employee', 'manager', 'finance', 'admin']}><ChatPage /></ProtectedRoute>} />
+      <Route path="/chat/:expenseId" element={<ProtectedRoute allowedRoles={['employee', 'manager', 'finance', 'admin']}><ChatPage /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/login" />} />
     </Routes>
   )

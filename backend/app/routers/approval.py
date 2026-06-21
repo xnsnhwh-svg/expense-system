@@ -14,6 +14,8 @@ def _notify(db: Session, user_id: int, title: str, content: str, expense_id: int
 
 
 def can_approve(expense: Expense, user: User) -> bool:
+    if expense.status == ExpenseStatus.PENDING_DEPT:
+        return user.role in [UserRole.MANAGER, UserRole.ADMIN]
     if expense.status == ExpenseStatus.PENDING_FINANCE:
         return user.role in [UserRole.FINANCE, UserRole.ADMIN]
     if expense.status == ExpenseStatus.PENDING_MANAGER:
@@ -22,19 +24,24 @@ def can_approve(expense: Expense, user: User) -> bool:
 
 
 def _get_next_status(expense: Expense, db: Session) -> ExpenseStatus:
+    if expense.status == ExpenseStatus.PENDING_DEPT:
+        return ExpenseStatus.PENDING_FINANCE
     if expense.status == ExpenseStatus.PENDING_FINANCE:
         chain = db.query(ApprovalChain).filter(
-            ApprovalChain.department == expense.employee.department if expense.employee else "",
+            ApprovalChain.department == (expense.employee.department if expense.employee else ""),
             ApprovalChain.category == expense.category,
             ApprovalChain.is_active == 1,
             ApprovalChain.min_amount <= expense.amount,
             ApprovalChain.max_amount >= expense.amount
         ).first()
-
         if chain and not chain.manager_required:
             return ExpenseStatus.APPROVED
         return ExpenseStatus.PENDING_MANAGER
     return ExpenseStatus.APPROVED
+
+
+def _get_approver_name(role: str) -> str:
+    return {"dept": "部门负责人", "finance": "财务", "manager": "终审"}.get(role, role)
 
 
 @router.post("/approve/{expense_id}")
@@ -60,10 +67,32 @@ def approve_expense(
     )
     db.add(log)
 
+    stage_names = {
+        "pending_dept": "部门审批",
+        "pending_finance": "财务核验",
+        "pending_manager": "终审"
+    }
+    stage = stage_names.get(old_status, "审核")
     _notify(db, expense.employee_id,
-        f"报销单{expense.expense_no}审核通过",
-        f"财务已审核通过你的报销单，金额¥{float(expense.amount):.2f}",
+        f"报销单{expense.expense_no}{stage}通过",
+        f"{stage}已通过，金额¥{float(expense.amount):.2f}",
         expense.id)
+
+    if expense.status == ExpenseStatus.PENDING_FINANCE:
+        finance_users = db.query(User).filter(User.role == UserRole.FINANCE).all()
+        for fu in finance_users:
+            _notify(db, fu.id,
+                "新报销单待财务核验",
+                f"{expense.employee.full_name}的报销单{expense.expense_no}通过部门审批，待财务核验",
+                expense.id)
+
+    if expense.status == ExpenseStatus.PENDING_MANAGER:
+        manager_users = db.query(User).filter(User.role == UserRole.MANAGER).all()
+        for mu in manager_users:
+            _notify(db, mu.id,
+                "报销单待终审",
+                f"{expense.employee.full_name}的报销单{expense.expense_no}通过财务核验，待终审",
+                expense.id)
 
     db.commit()
     return {"success": True, "status": expense.status.value}

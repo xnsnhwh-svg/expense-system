@@ -4,7 +4,7 @@ import { motion } from 'motion/react'
 import { message } from 'antd'
 import {
   ArrowLeft, Upload, CheckCircle, AlertTriangle, XCircle,
-  Edit, ShieldCheck, DollarSign, FileText, Loader, Trash2
+  Edit, ShieldCheck, DollarSign, FileText, Loader, Trash2, MessageCircle
 } from 'lucide-react'
 import api, { updateExpense, payExpense, deleteInvoice } from '../api'
 import AppLayout from '../components/AppLayout'
@@ -167,43 +167,43 @@ export default function ExpenseDetail() {
   return (
     <AppLayout title="报销详情">
       <div className="max-w-3xl mx-auto space-y-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-warm-500 hover:text-warm-700 transition-colors">
           <ArrowLeft className="w-4 h-4" /> 返回
         </button>
 
         {/* Main card */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl border border-slate-200 p-6 lg:p-8">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-2xl shadow-glass p-6 lg:p-8">
           <div className="flex items-start justify-between mb-6">
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h2 className="text-lg font-semibold text-slate-800 font-mono">{expense?.expense_no}</h2>
+                <h2 className="text-lg font-semibold text-warm-800 text-warm-500 font-mono tracking-tight">{expense?.expense_no}</h2>
                 <StatusBadge status={expense?.status} />
               </div>
               <div className="flex items-center gap-4 text-sm">
-                <span className="text-2xl font-bold text-slate-800">¥{expense?.amount?.toFixed(2)}</span>
-                <span className="text-slate-400">·</span>
-                <span className="text-slate-500">{expense?.category}</span>
+                <span className="text-2xl font-bold text-warm-800">¥{expense?.amount?.toFixed(2)}</span>
+                <span className="text-warm-400">·</span>
+                <span className="text-warm-500">{expense?.category}</span>
                 {expense?.expense_date && (
                   <>
-                    <span className="text-slate-400">·</span>
-                    <span className="text-slate-500 text-xs">{expense.expense_date}</span>
+                    <span className="text-warm-400">·</span>
+                    <span className="text-warm-500 text-xs">{expense.expense_date}</span>
                   </>
                 )}
               </div>
               {expense?.description && (
-                <p className="text-sm text-slate-500 mt-2">{expense.description}</p>
+                <p className="text-sm text-warm-500 mt-2">{expense.description}</p>
               )}
               {expense?.paid_at && (
-                <p className="text-xs text-slate-400 mt-2">打款时间: {expense.paid_at}</p>
+                <p className="text-xs text-warm-400 mt-2">打款时间: {expense.paid_at}</p>
               )}
               {expense?.payment_method && (
-                <p className="text-xs text-slate-400 mt-1">收款方式: {expense.payment_method}</p>
+                <p className="text-xs text-warm-400 mt-1">收款方式: {expense.payment_method}</p>
               )}
             </div>
           </div>
 
           {/* Status stepper */}
-          <div className="py-4 border-y border-slate-100 mb-6">
+          <div className="py-4 border-y border-warm-200/40 mb-6">
             <StatusStepper currentStatus={expense?.status} />
           </div>
 
@@ -219,14 +219,14 @@ export default function ExpenseDetail() {
                   setEditPayment(expense.payment_method || '')
                   setShowEdit(true)
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-warm-200/60 text-warm-600 hover:bg-warm-100/40 rounded-xl transition-colors"
               >
                 <Edit className="w-4 h-4" /> 编辑
               </button>
             )}
             {canSubmit && (
               <button onClick={handleSubmit} disabled={validating}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-brand-500 hover:bg-brand-600 disabled:bg-brand-300 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-brand-500/20 active:scale-[0.98]"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-brand-500 hover:bg-brand-600 disabled:bg-brand-300 text-white rounded-xl transition-all hover:shadow-glass-lg active:scale-[0.98]"
               >
                 {validating ? <Loader className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                 {validating ? '校验中...' : '提交报销'}
@@ -234,7 +234,7 @@ export default function ExpenseDetail() {
             )}
             {invoiceList.length > 0 && canEdit && (
               <button onClick={handleValidate} disabled={validating}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-warm-200/60 text-warm-600 hover:bg-warm-100/40 rounded-xl transition-colors"
               >
                 {validating ? <Loader className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                 AI校验发票
@@ -242,11 +242,16 @@ export default function ExpenseDetail() {
             )}
             {canPay && (
               <button onClick={handlePay}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-emerald-500/20 active:scale-[0.98]"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all hover:shadow-glass-lg active:scale-[0.98]"
               >
                 <DollarSign className="w-4 h-4" /> 确认打款
               </button>
             )}
+            <button onClick={() => navigate(`/chat?expense=${id}`)}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-brand-200 text-brand-600 hover:bg-brand-50 rounded-xl transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" /> 沟通
+            </button>
           </div>
         </motion.div>
 
@@ -271,21 +276,21 @@ export default function ExpenseDetail() {
               </span>
             </div>
             {validationResult.summary && (
-              <p className="text-sm text-slate-600 mb-3">{validationResult.summary}</p>
+              <p className="text-sm text-warm-600 mb-3">{validationResult.summary}</p>
             )}
             {validationResult.invoices?.map(inv => (
               <div key={inv.invoice_id} className="mt-3 pt-3 border-t border-inherit">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-slate-600">{inv.invoice_no || '未知发票'}</span>
-                  <span className="text-xs text-slate-400">{inv.summary}</span>
+                  <span className="text-xs font-medium text-warm-600">{inv.invoice_no || '未知发票'}</span>
+                  <span className="text-xs text-warm-400">{inv.summary}</span>
                 </div>
                 {(inv.details || []).map((d, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs py-1">
                     <span className={`px-1.5 py-0.5 rounded font-medium ${
-                      d.passed ? 'bg-emerald-100 text-emerald-700' :
-                      d.level === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                      d.passed ? 'bg-emerald-100/60 text-emerald-700' :
+                      d.level === 'warning' ? 'bg-amber-100/60 text-amber-700' : 'bg-red-100/60 text-red-700'
                     }`}>{d.name}</span>
-                    <span className="text-slate-500">{d.message}</span>
+                    <span className="text-warm-500">{d.message}</span>
                   </div>
                 ))}
               </div>
@@ -295,24 +300,24 @@ export default function ExpenseDetail() {
 
         {/* Invoice management */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="bg-white rounded-xl border border-slate-200 p-6 lg:p-8"
+          className="glass rounded-2xl shadow-glass p-6 lg:p-8"
         >
-          <h3 className="text-sm font-semibold text-slate-800 mb-4">发票管理</h3>
+          <h3 className="text-sm font-semibold text-warm-800 mb-4">发票管理</h3>
 
           {canEdit && (
             <div
               onClick={() => fileRef.current?.click()}
-              className="border-2 border-dashed border-slate-200 hover:border-brand-300 hover:bg-brand-50/30 rounded-xl p-8 text-center cursor-pointer transition-all"
+              className="border-2 border-dashed border-warm-200/60 hover:border-brand-300 hover:bg-brand-50/40 rounded-xl p-8 text-center cursor-pointer transition-all"
             >
               {uploading ? (
                 <Loader className="w-8 h-8 text-brand-400 mx-auto animate-spin" />
               ) : (
-                <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <Upload className="w-8 h-8 text-warm-300 mx-auto mb-2" />
               )}
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-warm-500">
                 {uploading ? '上传中...' : '点击或拖拽上传发票'}
               </p>
-              <p className="text-xs text-slate-400 mt-1">支持 JPG、PNG、PDF，单文件不超过10MB</p>
+              <p className="text-xs text-warm-400 mt-1">支持 JPG、PNG、PDF，单文件不超过10MB</p>
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,application/pdf" onChange={handleUpload} className="hidden" />
             </div>
           )}
@@ -320,22 +325,22 @@ export default function ExpenseDetail() {
           {invoiceList.length > 0 && (
             <div className="mt-4 space-y-3">
               {invoiceList.map(inv => (
-                <div key={inv.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                <div key={inv.id} className="flex items-center justify-between p-4 bg-warm-100/60 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-slate-300" />
+                    <FileText className="w-8 h-8 text-warm-300" />
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-slate-700">{inv.invoice_no || '未知发票号'}</span>
+                        <span className="text-sm font-medium text-warm-700">{inv.invoice_no || '未知发票号'}</span>
                         {inv.validation_result && (
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            inv.validation_result === 'valid' ? 'bg-emerald-100 text-emerald-600' :
-                            inv.validation_result === 'warning' ? 'bg-amber-100 text-amber-600' : 'bg-red-100 text-red-600'
+                            inv.validation_result === 'valid' ? 'bg-emerald-100/60 text-emerald-600' :
+                            inv.validation_result === 'warning' ? 'bg-amber-100/60 text-amber-600' : 'bg-red-100/60 text-red-600'
                           }`}>
                             {inv.validation_result === 'valid' ? '已校验' : inv.validation_result === 'warning' ? '警告' : '未通过'}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-warm-400 mt-0.5">
                         销售方: {inv.seller_name || '未知'} · 金额: ¥{inv.invoice_amount?.toFixed(2) || '0.00'}
                       </p>
                     </div>
@@ -360,58 +365,58 @@ export default function ExpenseDetail() {
 
         {/* Edit modal */}
         {showEdit && (
-          <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4" onClick={() => setShowEdit(false)}>
+          <div className="fixed inset-0 bg-warm-900/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowEdit(false)}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md"
+              className="glass-strong rounded-2xl shadow-glass-lg p-6 w-full max-w-md"
             >
-              <h3 className="font-semibold text-slate-800 mb-4">编辑报销单</h3>
+              <h3 className="font-semibold text-warm-800 mb-4">编辑报销单</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-slate-600 mb-1 block">金额</label>
+                  <label className="text-sm text-warm-600 mb-1 block">金额</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">¥</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-400">¥</span>
                     <input type="number" min="0.01" step="0.01" value={editAmount} onChange={e => setEditAmount(e.target.value)}
-                      className="w-full pl-8 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+                      className="w-full pl-8 pr-4 py-2 border border-warm-200/60 rounded-xl text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 outline-none" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600 mb-1 block">类别</label>
+                  <label className="text-sm text-warm-600 mb-1 block">类别</label>
                   <div className="grid grid-cols-3 gap-2">
                     {['差旅', '办公', '招待', '交通', '其他'].map(cat => (
                       <button key={cat} type="button" onClick={() => setEditCategory(cat)}
-                        className={`py-2 px-3 rounded-lg text-sm border transition-all ${
-                          editCategory === cat ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600'
+                        className={`py-2 px-3 rounded-xl text-sm border transition-all ${
+                          editCategory === cat ? 'border-brand-500 bg-brand-50/60 text-brand-700' : 'border-warm-200/60 text-warm-600'
                         }`}>{cat}</button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600 mb-1 block">事由</label>
+                  <label className="text-sm text-warm-600 mb-1 block">事由</label>
                   <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} rows={3}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none resize-none" />
+                    className="w-full px-3 py-2 border border-warm-200/60 rounded-xl text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 outline-none resize-none" />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600 mb-1 block">费用日期</label>
+                  <label className="text-sm text-warm-600 mb-1 block">费用日期</label>
                   <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+                    className="w-full px-3 py-2 border border-warm-200/60 rounded-xl text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 outline-none" />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600 mb-1 block">收款方式</label>
+                  <label className="text-sm text-warm-600 mb-1 block">收款方式</label>
                   <div className="grid grid-cols-2 gap-2">
                     {['银行卡', '支付宝', '微信', '现金'].map(m => (
                       <button key={m} type="button" onClick={() => setEditPayment(m === editPayment ? '' : m)}
-                        className={'py-2 px-3 rounded-lg text-xs border transition-all ' +
-                          (editPayment === m ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600')}>{m}</button>
+                        className={'py-2 px-3 rounded-xl text-xs border transition-all ' +
+                          (editPayment === m ? 'border-brand-500 bg-brand-50/60 text-brand-700' : 'border-warm-200/60 text-warm-600')}>{m}</button>
                     ))}
                   </div>
                 </div>
               </div>
               <div className="flex gap-2 justify-end mt-6">
-                <button onClick={() => setShowEdit(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">取消</button>
-                <button onClick={handleEdit} className="px-4 py-2 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition-colors">保存</button>
+                <button onClick={() => setShowEdit(false)} className="px-4 py-2 text-sm text-warm-600 hover:bg-warm-100/40 rounded-xl transition-colors">取消</button>
+                <button onClick={handleEdit} className="px-4 py-2 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-colors">保存</button>
               </div>
             </motion.div>
           </div>

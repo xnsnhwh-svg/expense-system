@@ -29,3 +29,8 @@ uploads/
 # Tools
 .codegraph/
 .playwright-mcp/
+
+# Project docs (local only)
+*.pdf
+*.docx
+gen_docx.py

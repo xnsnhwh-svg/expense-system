@@ -7,6 +7,8 @@ from app.routers.admin import router as admin_router
 from app.routers.notification import router as notification_router
 from app.routers.budget import router as budget_router
 from app.routers.standard import router as standard_router
+from app.routers.payment import router as payment_router
+from app.routers.chat import router as chat_router
 import os
 
 app = FastAPI(title="企业财务智能报销系统", version="2.0.0")
@@ -31,6 +33,8 @@ app.include_router(admin_router)
 app.include_router(notification_router)
 app.include_router(budget_router)
 app.include_router(standard_router)
+app.include_router(payment_router)
+app.include_router(chat_router)
 
 
 @app.get("/")

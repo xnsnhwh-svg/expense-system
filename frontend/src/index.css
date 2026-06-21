@@ -1,51 +1,105 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', 'Geist', system-ui, -apple-system, sans-serif;
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  --font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* Apple-style refined blue */
+  --color-brand-50: #f0f5ff;
+  --color-brand-100: #dce7fe;
+  --color-brand-200: #c0d6fd;
+  --color-brand-300: #90b4fb;
+  --color-brand-400: #5e93f7;
+  --color-brand-500: #3478f6;
+  --color-brand-600: #1a5ce5;
+  --color-brand-700: #1649c0;
+  --color-brand-800: #173d9c;
+  --color-brand-900: #18357c;
+
+  /* Warm neutrals (Apple's signature slightly warm grays) */
+  --color-warm-50: #fafaf8;
+  --color-warm-100: #f5f4f0;
+  --color-warm-200: #e8e6df;
+  --color-warm-300: #d4d1c8;
+  --color-warm-400: #b0aca0;
+  --color-warm-500: #8c887c;
+  --color-warm-600: #6b675e;
+  --color-warm-700: #54514a;
+  --color-warm-800: #3d3a35;
+  --color-warm-900: #24221e;
+
+  /* Glass shadows */
+  --shadow-glass: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-glass-lg: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04), 0 6px 18px rgba(0, 0, 0, 0.07);
+  --shadow-button: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Glass utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.56);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
 }
 
 body {
   margin: 0;
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: #f5f4f0;
+  color: #24221e;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
+/* Apple-style focus ring */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.animate-slide-up {
-  animation: slideUp 0.4s ease-out;
+/* Refined scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out;
-}
-
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -54,8 +108,20 @@ body {
   100% { background-position: 200% 0; }
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .animate-shimmer {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, #f5f4f0 25%, #e8e6df 50%, #f5f4f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }

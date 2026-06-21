@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>企业财务智能报销与审核编排系统 - 项目介绍</title>
+<style>
+  @page { size: A4; margin: 2cm 1.5cm; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 11pt; line-height: 1.6; color: #333; }
+  h1 { font-size: 20pt; text-align: center; border-bottom: 3px solid #1677ff; padding-bottom: 10px; margin-bottom: 5px; }
+  .subtitle { text-align: center; color: #666; font-size: 10pt; margin-bottom: 20px; }
+  h2 { font-size: 14pt; color: #1677ff; border-left: 4px solid #1677ff; padding-left: 8px; margin-top: 20px; margin-bottom: 10px; }
+  h3 { font-size: 12pt; color: #333; margin-top: 14px; margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #ddd; padding: 5px 8px; text-align: left; }
+  th { background: #f0f5ff; font-weight: 600; }
+  .arch-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 9pt; white-space: pre; line-height: 1.4; margin: 8px 0; }
+  .tag-done { color: #52c41a; font-weight: bold; }
+  .highlight { background: #fffbe6; padding: 2px 4px; border-radius: 3px; }
+  .footer { margin-top: 30px; text-align: right; font-size: 9pt; color: #999; border-top: 1px solid #eee; padding-top: 8px; }
+  .question { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; padding: 10px; margin: 6px 0; }
+  .risk-table td:first-child { font-weight: 600; }
+  p { margin: 4px 0; }
+  ul { margin: 4px 0; padding-left: 20px; }
+  li { margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<h1>企业财务智能报销与审核编排系统</h1>
+<div class="subtitle">项目类型：AI Agent 应用系统 &nbsp;|&nbsp; 技术栈：FastAPI + React + CrewAI + 百度OCR</div>
+
+<h2>一、项目概述</h2>
+<p><strong>一句话定位：</strong>基于 CrewAI 多 Agent 编排的企业报销系统，实现发票 OCR 识别、AI 合规校验和智能审批路由。</p>
+
+<h3>真实问题与应用场景</h3>
+<table>
+<tr><th>痛点</th><th>具体表现</th></tr>
+<tr><td>人工审核效率低</td><td>财务逐张核对发票，耗时耗力</td></tr>
+<tr><td>合规检查易遗漏</td><td>重复报销、金额不一致难以人工发现</td></tr>
+<tr><td>流程不透明</td><td>员工不知道报销单卡在哪个环节</td></tr>
+<tr><td>数据统计困难</td><td>部门费用汇总依赖手工 Excel</td></tr>
+</table>
+<p><strong>目标用户：</strong>企业员工、财务人员、部门主管、系统管理员</p>
+
+<h2>二、系统架构</h2>
+<div class="arch-box">┌─────────────────────────────────────────────────┐
+│                 前端 (React + Ant Design)         │
+│    员工端 │ 财务端 │ 主管端 │ 管理后台 │ 数据报表  │
+└───────────────────────┬─────────────────────────┘
+                        │ REST API
+┌───────────────────────┴─────────────────────────┐
+│              后端 (FastAPI + SQLAlchemy)           │
+│                                                   │
+│  ┌───────────────────────────────────────────┐   │
+│  │        CrewAI 多 Agent 编排引擎            │   │
+│  │  ┌────────┐   ┌────────┐   ┌────────┐    │   │
+│  │  │OCR识别  │→ │合规校验 │→ │审批路由 │    │   │
+│  │  │ Agent  │   │ Agent  │   │ Agent  │    │   │
+│  │  └────────┘   └────────┘   └────────┘    │   │
+│  └───────────────────────────────────────────┘   │
+│                                                   │
+│  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐ │
+│  │百度OCR │  │通知系统 │  │预算管理 │  │报表导出 │ │
+│  └────────┘  └────────┘  └────────┘  └────────┘ │
+└───────────────────────┬─────────────────────────┘
+               ┌────────┴────────┐
+               │   SQLite 数据库   │
+               └─────────────────┘</div>
+
+<h2>三、核心功能与当前进展</h2>
+<table>
+<tr><th>模块</th><th>功能</th><th>状态</th></tr>
+<tr><td>发票管理</td><td>上传发票（JPG/PNG/PDF）、百度OCR识别、自动提取发票号/金额/日期</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>AI合规校验</td><td>真实性校验、重复报销检测、金额一致性校验、OCR置信度校验</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>多级审批</td><td>财务初审 → 主管审批（≥5000元）→ 打款</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>退单重提</td><td>驳回后可编辑重新提交，保留审批历史</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>角色权限</td><td>员工/财务/主管/管理员四级权限，路由守卫</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>通知系统</td><td>状态变更自动推送站内通知</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>管理后台</td><td>用户管理、费用类别配置、系统参数设置</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>数据报表</td><td>按部门/类别/时间维度统计，CSV导出</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>批量操作</td><td>财务/主管批量审批、批量退回</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>打款管理</td><td>财务确认打款，记录打款时间</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>预算管理</td><td>部门预算额度设置、预算占用跟踪</td><td class="tag-done">✅ 已完成</td></tr>
+<tr><td>审批链配置</td><td>按金额/部门动态路由审批策略</td><td class="tag-done">✅ 已完成</td></tr>
+</table>
+
+<h2>四、AI 工具使用与系统编排</h2>
+
+<h3>1. CrewAI 多 Agent 编排</h3>
+<table>
+<tr><th>Agent</th><th>职责</th><th>输入</th><th>输出</th></tr>
+<tr><td>OCR识别 Agent</td><td>从发票图片提取结构化信息</td><td>发票图片/PDF</td><td>发票号、金额、日期、销售方</td></tr>
+<tr><td>合规校验 Agent</td><td>执行4项合规检查</td><td>发票数据 + 报销单</td><td>校验结果（通过/警告/不通过）</td></tr>
+<tr><td>审批路由 Agent</td><td>根据规则确定审批节点</td><td>报销金额、部门、校验结果</td><td>审批链路（财务/主管/管理员）</td></tr>
+</table>
+
+<h3>2. 百度 OCR API</h3>
+<ul>
+<li><strong>增值税发票识别</strong>：提取发票代码、号码、含税金额、税额、销售方等</li>
+<li><strong>通用文字识别</strong>：兜底方案，处理火车票、出租车票等非标发票</li>
+<li><strong>PDF 转图</strong>：使用 PyMuPDF 将 PDF 发票转为图片后识别</li>
+</ul>
+
+<h3>3. AI 合规校验规则</h3>
+<table>
+<tr><th>检查项</th><th>说明</th><th>不通过处理</th></tr>
+<tr><td>发票真实性</td><td>发票号码格式校验、销售方信息完整性</td><td>阻断提交</td></tr>
+<tr><td>重复报销</td><td>全库检索相同发票号，关联已审批/打款记录</td><td>阻断提交</td></tr>
+<tr><td>金额一致性</td><td>发票含税金额与报销金额对比，差额>0.01元触发</td><td>警告，可提交</td></tr>
+<tr><td>OCR置信度</td><td>识别置信度&lt;70%触发人工复核提醒</td><td>警告，可提交</td></tr>
+</table>
+
+<h2>五、存在的问题与风险</h2>
+<table class="risk-table">
+<tr><th>问题</th><th>影响</th><th>应对措施</th></tr>
+<tr><td>OCR 对非标发票识别率有限</td><td>火车票等结构化提取不完整</td><td>通用OCR兜底 + 人工复核</td></tr>
+<tr><td>百度 OCR API 调用限制</td><td>高并发场景可能触发限流</td><td>可加本地缓存和异步队列</td></tr>
+<tr><td>数据库使用 SQLite</td><td>生产环境并发性能有限</td><td>可迁移至 PostgreSQL</td></tr>
+<tr><td>缺少电子发票验真</td><td>无法对接国家税务总局查验平台</td><td>后续可集成验真API</td></tr>
+</table>
+
+<h2>六、下一步计划</h2>
+<ol>
+<li><strong>电子发票验真</strong>：对接国家税务总局发票查验平台，验证发票真伪</li>
+<li><strong>操作审计日志</strong>：记录所有关键操作，支持追溯和合规审查</li>
+<li><strong>差旅申请关联</strong>：出差申请单与报销单关联，实现差旅全流程管理</li>
+<li><strong>数据库升级</strong>：SQLite 迁移至 PostgreSQL，支持更高并发</li>
+</ol>
+
+<h2>七、希望评委指导的问题</h2>
+<div class="question">
+<p><strong>问题1：</strong>当前 OCR + 规则引擎的组合方案，如何进一步提升合规校验的准确率？是否需要引入大模型做语义理解？</p>
+</div>
+<div class="question">
+<p><strong>问题2：</strong>CrewAI 多 Agent 编排在生产环境中，如何保证任务执行的稳定性和异常恢复能力？</p>
+</div>
+
+<div class="footer">
+项目负责人：___________ &emsp; 联系方式：___________ &emsp; 日期：2026年6月
+</div>
+
+</body>
+</html>
