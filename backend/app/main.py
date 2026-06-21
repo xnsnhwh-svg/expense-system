@@ -9,6 +9,9 @@ from app.routers.budget import router as budget_router
 from app.routers.standard import router as standard_router
 from app.routers.payment import router as payment_router
 from app.routers.chat import router as chat_router
+from app.database import engine, Base, SessionLocal
+from app.models import *
+from app.utils.security import get_password_hash
 import os
 
 app = FastAPI(title="企业财务智能报销系统", version="2.0.0")
@@ -22,8 +25,24 @@ app.add_middleware(
 )
 
 uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
-if os.path.exists(uploads_dir):
-    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+os.makedirs(uploads_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
+
+@app.on_event("startup")
+def init_db():
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    if db.query(User).count() == 0:
+        users = [
+            User(username="admin", full_name="系统管理员", role=UserRole.ADMIN, department="IT", hashed_password=get_password_hash("123456")),
+            User(username="finance", full_name="财务人员", role=UserRole.FINANCE, department="财务部", hashed_password=get_password_hash("123456")),
+            User(username="employee", full_name="测试员工", role=UserRole.EMPLOYEE, department="研发部", hashed_password=get_password_hash("123456")),
+            User(username="manager", full_name="主管", role=UserRole.MANAGER, department="管理部", hashed_password=get_password_hash("123456")),
+        ]
+        db.add_all(users)
+        db.commit()
+    db.close()
 
 app.include_router(auth.router)
 app.include_router(expense.router)
