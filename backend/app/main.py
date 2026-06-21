@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.routers import auth, expense, approval
 from app.routers.invoice import router as invoice_router
 from app.routers.admin import router as admin_router
@@ -25,7 +26,8 @@ app.add_middleware(
 )
 
 uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
-os.makedirs(uploads_dir, exist_ok=True)
+if not os.path.exists(uploads_dir):
+    os.makedirs(uploads_dir)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 
@@ -44,6 +46,7 @@ def init_db():
         db.commit()
     db.close()
 
+
 app.include_router(auth.router)
 app.include_router(expense.router)
 app.include_router(approval.router)
@@ -56,11 +59,19 @@ app.include_router(payment_router)
 app.include_router(chat_router)
 
 
-@app.get("/")
-def root():
-    return {"message": "企业财务智能报销系统 API"}
-
-
+@app.get("/api")
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.exists(static_dir):
+    app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str, request: Request):
+        file_path = os.path.join(static_dir, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(static_dir, "index.html"))
