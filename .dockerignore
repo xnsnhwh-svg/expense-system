@@ -1,4 +1,3 @@
-backend/static/
 backend/expense.db
 backend/__pycache__/
 backend/app/__pycache__/
