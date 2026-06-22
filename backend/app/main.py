@@ -69,6 +69,10 @@ static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
 if os.path.exists(static_dir):
     app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="assets")
 
+    @app.get("/")
+    async def serve_index():
+        return FileResponse(os.path.join(static_dir, "index.html"))
+
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str, request: Request):
         file_path = os.path.join(static_dir, full_path)
