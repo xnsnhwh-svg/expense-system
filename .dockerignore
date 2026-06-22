@@ -1,4 +1,9 @@
+backend/static/
+backend/expense.db
+backend/__pycache__/
+backend/app/__pycache__/
+**/__pycache__/
+*.pyc
 node_modules/
-*.db
-frontend/
-docs/
+.env
+.git
