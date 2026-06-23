@@ -36,6 +36,16 @@ def init_db():
             )
             db.add(employee)
 
+        if not db.query(User).filter(User.username == "manager").first():
+            manager = User(
+                username="manager",
+                hashed_password=get_password_hash("manager123"),
+                full_name="主管",
+                role=UserRole.MANAGER,
+                department="管理部"
+            )
+            db.add(manager)
+
         db.commit()
         print("数据库初始化完成！")
     finally:

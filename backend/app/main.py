@@ -37,10 +37,10 @@ def init_db():
     db = SessionLocal()
     if db.query(User).count() == 0:
         users = [
-            User(username="admin", full_name="系统管理员", role=UserRole.ADMIN, department="IT", hashed_password=get_password_hash("123456")),
-            User(username="finance", full_name="财务人员", role=UserRole.FINANCE, department="财务部", hashed_password=get_password_hash("123456")),
-            User(username="employee", full_name="测试员工", role=UserRole.EMPLOYEE, department="研发部", hashed_password=get_password_hash("123456")),
-            User(username="manager", full_name="主管", role=UserRole.MANAGER, department="管理部", hashed_password=get_password_hash("123456")),
+            User(username="admin", full_name="系统管理员", role=UserRole.ADMIN, department="IT", hashed_password=get_password_hash("admin123")),
+            User(username="finance", full_name="财务人员", role=UserRole.FINANCE, department="财务部", hashed_password=get_password_hash("finance123")),
+            User(username="employee", full_name="测试员工", role=UserRole.EMPLOYEE, department="研发部", hashed_password=get_password_hash("employee123")),
+            User(username="manager", full_name="主管", role=UserRole.MANAGER, department="管理部", hashed_password=get_password_hash("manager123")),
         ]
         db.add_all(users)
         db.commit()
