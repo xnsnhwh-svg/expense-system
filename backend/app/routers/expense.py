@@ -219,18 +219,13 @@ def submit_expense(
         raise HTTPException(status_code=400, detail="请先上传发票再提交")
 
     from datetime import datetime
-    expense.status = ExpenseStatus.PENDING_DEPT
+    expense.status = ExpenseStatus.PENDING_FINANCE
     expense.submitted_at = datetime.utcnow()
 
-    dept_managers = db.query(User).filter(
-        User.role == UserRole.MANAGER,
-        User.department == current_user.department
-    ).all()
-    if not dept_managers:
-        dept_managers = db.query(User).filter(User.role == UserRole.MANAGER).all()
-    for mu in dept_managers:
-        _create_notification(db, mu.id,
-            "新报销单待部门审批",
+    finance_users = db.query(User).filter(User.role == UserRole.FINANCE).all()
+    for fu in finance_users:
+        _create_notification(db, fu.id,
+            "新报销单待财务审核",
             f"{current_user.full_name}提交了报销单{expense.expense_no}，金额¥{float(expense.amount):.2f}",
             expense.id)
 

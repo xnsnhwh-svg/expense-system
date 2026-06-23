@@ -3,9 +3,8 @@ import clsx from 'clsx'
 const statusConfig = {
   draft:        { label: '草稿', color: 'bg-warm-200/60 text-warm-500' },
   returned:     { label: '已退回', color: 'bg-amber-100/60 text-amber-600' },
-  pending_dept: { label: '待部门审批', color: 'bg-indigo-100/60 text-indigo-600' },
-  pending_finance: { label: '待财务核验', color: 'bg-brand-100/60 text-brand-600' },
-  pending_manager: { label: '待终审', color: 'bg-purple-100/60 text-purple-600' },
+  pending_finance: { label: '待财务审核', color: 'bg-brand-100/60 text-brand-600' },
+  pending_manager: { label: '待主管审批', color: 'bg-purple-100/60 text-purple-600' },
   approved:     { label: '已通过', color: 'bg-emerald-100/60 text-emerald-600' },
   rejected:     { label: '已驳回', color: 'bg-red-100/60 text-red-600' },
   paid:         { label: '已打款', color: 'bg-cyan-100/60 text-cyan-600' },

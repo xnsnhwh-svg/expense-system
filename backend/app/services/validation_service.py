@@ -41,6 +41,30 @@ class ValidationService:
 
     def _check_reality(self, invoice: Invoice) -> dict:
         """真实性校验"""
+        invoice_type = getattr(invoice, 'invoice_type', '') or ''
+
+        # 火车票、机票等交通票据不需要发票号码
+        transport_types = ['火车票', '机票', '汽车票', '船票', '出租车票', '交通票']
+        is_transport = any(t in invoice_type for t in transport_types)
+
+        if is_transport:
+            if not invoice.invoice_amount or float(invoice.invoice_amount) <= 0:
+                return {
+                    "code": "REALITY_CHECK",
+                    "name": "票据真实性",
+                    "passed": False,
+                    "level": "error",
+                    "message": "票据金额缺失或无效"
+                }
+            return {
+                "code": "REALITY_CHECK",
+                "name": "票据真实性",
+                "passed": True,
+                "level": "info",
+                "message": f"交通票据校验通过（{invoice_type}）"
+            }
+
+        # 增值税发票等需要发票号码
         if not invoice.invoice_no or len(str(invoice.invoice_no)) < 8:
             return {
                 "code": "REALITY_CHECK",
@@ -82,7 +106,7 @@ class ValidationService:
         existing = db.query(Invoice).join(Expense).filter(
             Invoice.invoice_no == invoice.invoice_no,
             Invoice.id != invoice.id,
-            Expense.status.in_(["pending_dept", "pending_finance", "pending_manager", "approved", "paid"])
+            Expense.status.in_(["pending_finance", "pending_manager", "approved", "paid"])
         ).first()
 
         if existing:

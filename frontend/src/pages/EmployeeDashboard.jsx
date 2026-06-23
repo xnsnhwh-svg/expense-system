@@ -26,7 +26,7 @@ export default function EmployeeDashboard() {
   const stats = {
     total: expenses.length,
     draft: expenses.filter(e => e.status === 'draft' || e.status === 'returned').length,
-    pending: expenses.filter(e => e.status === 'pending_finance' || e.status === 'pending_manager' || e.status === 'pending_dept').length,
+    pending: expenses.filter(e => e.status === 'pending_finance' || e.status === 'pending_manager').length,
     done: expenses.filter(e => e.status === 'approved' || e.status === 'paid').length,
   }
 

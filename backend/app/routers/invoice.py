@@ -191,7 +191,12 @@ async def upload_invoice(
 
         invoice.seller_name = ocr_result["data"].get("seller_name")
         invoice.buyer_name = ocr_result["data"].get("buyer_name")
-        invoice.invoice_amount = float(ocr_result["data"].get("amount", 0))
+
+        import re
+        raw_amount = str(ocr_result["data"].get("amount", "0"))
+        amount_match = re.search(r'[\d.]+', raw_amount)
+        invoice.invoice_amount = float(amount_match.group()) if amount_match else 0
+
         invoice.ocr_confidence = ocr_result["data"].get("ocr_confidence")
         invoice.ocr_raw_text = json.dumps(ocr_result["data"], ensure_ascii=False)
         invoice.invoice_type = ocr_result["data"].get("invoice_type", "")

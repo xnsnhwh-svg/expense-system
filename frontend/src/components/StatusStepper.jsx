@@ -2,14 +2,13 @@ import clsx from 'clsx'
 
 const steps = [
   { status: 'draft', title: '创建' },
-  { status: 'pending_dept', title: '部门审批' },
-  { status: 'pending_finance', title: '财务核验' },
-  { status: 'pending_manager', title: '终审' },
+  { status: 'pending_finance', title: '财务审核' },
+  { status: 'pending_manager', title: '主管审批' },
   { status: 'approved', title: '通过' },
   { status: 'paid', title: '打款完成' },
 ]
 
-const stepOrder = ['draft', 'returned', 'pending_dept', 'pending_finance', 'pending_manager', 'approved', 'paid']
+const stepOrder = ['draft', 'returned', 'pending_finance', 'pending_manager', 'approved', 'paid']
 
 function getStepIndex(status) {
   if (status === 'returned') return 0

@@ -23,7 +23,7 @@ export default function FinanceDashboard() {
     try {
       const result = await api.get('/expense/list')
       setExpenses((result || []).filter(e =>
-        e.status !== 'draft' && e.status !== 'returned' && e.status !== 'pending_dept'
+        e.status !== 'draft' && e.status !== 'returned'
       ))
     } catch (e) {}
     setLoading(false)

@@ -55,14 +55,24 @@ export default function ExpenseDetail() {
   const handleUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 10 * 1024 * 1024) return
+    if (file.size > 10 * 1024 * 1024) {
+      message.error('文件大小不能超过10MB')
+      return
+    }
     setUploading(true)
     const fd = new FormData()
     fd.append('file', file)
     try {
-      await api.post(`/invoice/upload/${id}`, fd)
+      const result = await api.post(`/invoice/upload/${id}`, fd)
+      if (result.ocr_error) {
+        message.warning('发票已上传，但OCR识别失败：' + result.ocr_error)
+      } else {
+        message.success('发票上传成功' + (result.is_mock ? '（模拟识别）' : ''))
+      }
       loadData()
-    } catch (e) {}
+    } catch (e) {
+      message.error(e.response?.data?.detail || '上传失败')
+    }
     finally { setUploading(false) }
   }
 
@@ -71,8 +81,18 @@ export default function ExpenseDetail() {
     try {
       const result = await api.post(`/invoice/validate-expense/${id}`)
       setValidationResult(result)
+      if (result.overall === 'valid') {
+        message.success('校验全部通过')
+      } else if (result.overall === 'warning') {
+        message.warning('校验通过但存在警告')
+      } else {
+        message.error('校验未通过')
+      }
       return result
-    } catch (e) { return null }
+    } catch (e) {
+      message.error('校验失败：' + (e.response?.data?.detail || '未知错误'))
+      return null
+    }
     finally { setValidating(false) }
   }
 

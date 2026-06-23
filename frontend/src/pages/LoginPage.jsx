@@ -32,10 +32,10 @@ export default function LoginPage() {
   }
 
   const testAccounts = [
-    { role: '员工', user: 'employee', pwd: '123456' },
-    { role: '财务', user: 'finance', pwd: '123456' },
-    { role: '主管', user: 'manager', pwd: '123456' },
-    { role: '管理员', user: 'admin', pwd: '123456' },
+    { role: '员工', user: 'employee', pwd: 'employee123' },
+    { role: '财务', user: 'finance', pwd: 'finance123' },
+    { role: '主管', user: 'manager', pwd: 'manager123' },
+    { role: '管理员', user: 'admin', pwd: 'admin123' },
   ]
 
   return (
