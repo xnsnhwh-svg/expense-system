@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import EmployeeDashboard from './pages/EmployeeDashboard'
 import FinanceDashboard from './pages/FinanceDashboard'
@@ -27,7 +28,7 @@ function App() {
       <Route path="/payments" element={<ProtectedRoute allowedRoles={['finance', 'admin']}><PaymentPage /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute allowedRoles={['employee', 'manager', 'finance', 'admin']}><ChatPage /></ProtectedRoute>} />
       <Route path="/chat/:expenseId" element={<ProtectedRoute allowedRoles={['employee', 'manager', 'finance', 'admin']}><ChatPage /></ProtectedRoute>} />
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<LandingPage />} />
     </Routes>
   )
 }
